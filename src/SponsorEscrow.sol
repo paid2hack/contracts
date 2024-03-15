@@ -6,9 +6,9 @@ import { Ownable } from "openzeppelin/access/Ownable.sol";
 contract SponsorEscrow is Ownable {
   string public name;
 
-  constructor(string memory name)
+  constructor(string memory _name)
     Ownable(_msgSender())
   {
-    this.name = name;
+    name = _name;
   }
 }

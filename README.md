@@ -28,6 +28,12 @@ To run a local devnet:
 $ bun devnet
 ```
 
+To deploy to local devnet:
+
+```shell
+$ bun deploy-local
+```
+
 ## License
 
 AGPLv3 - see [LICENSE.md](LICENSE.md)

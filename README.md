@@ -22,17 +22,21 @@ To compile the contracts:
 $ bun compile
 ```
 
-To run a local devnet:
+### Deploy to local testnet
+
+In a separate terminal, start a local devnet:
 
 ```shell
 $ bun devnet
 ```
 
-To deploy to local devnet:
+Now deploy the contracts:
 
 ```shell
 $ bun deploy-local
 ```
+
+_Note: Deployment is done using [CREATE2](). So, if you need to deploy the contracts again, first stop and restart the devnet in the other terminal._
 
 ## License
 

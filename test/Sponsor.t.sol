@@ -170,6 +170,16 @@ contract SponsorTest is Test {
     assertEq(s.getClaimablePrize(2, owner4, address(token2)), 120 / 3);
   }
 
+  function test_Sponsor_ClaimPrize_NoneOwed() public {
+    Sponsor s = test_Sponsor_AllocatePrizes();
+
+    vm.prank(owner1);
+    s.claimPrize(1, address(token1));
+
+    assertEq(token1.balanceOf(owner1), 0);    
+    assertEq(token1.balanceOf(address(s)), 120);
+  }
+
   function test_Sponsor_ClaimPrize() public {
     Sponsor s = test_Sponsor_AllocatePrizes();
 
@@ -177,6 +187,11 @@ contract SponsorTest is Test {
     s.claimPrize(1, address(token1));
     s.claimPrize(1, address(token2));
     vm.stopPrank();
+
+    assertEq(s.claimedAmounts(owner2, address(token1)), 90 / 3);
+    assertEq(s.claimedAmounts(owner2, address(token2)), 150 / 3);
+    assertEq(s.totalClaimedAmounts(address(token1)), 90 / 3);
+    assertEq(s.totalClaimedAmounts(address(token2)), 150 / 3);
 
     assertEq(s.getClaimablePrize(1, owner1, address(token1)), 0);
     assertEq(s.getClaimablePrize(1, owner2, address(token1)), 0);
@@ -192,5 +207,34 @@ contract SponsorTest is Test {
 
     assertEq(token1.balanceOf(address(s)), 120 - 90 / 3);
     assertEq(token2.balanceOf(address(s)), 270 - 150 / 3);
+  }
+
+  function test_Sponsor_ClaimPrize_AfterNewPrizeAllocated() public {
+    Sponsor s = test_Sponsor_AllocatePrizes();
+
+    vm.prank(owner2);
+    s.claimPrize(1, address(token1));
+
+    assertEq(s.claimedAmounts(owner2, address(token1)), 90 / 3);
+    assertEq(s.totalClaimedAmounts(address(token1)), 90 / 3);
+
+    assertEq(token1.balanceOf(owner2), 90 / 3);
+    assertEq(token1.balanceOf(address(s)), 120 - 90 / 3);
+
+    token1.mint(address(s), 300);
+
+    vm.prank(owner1);
+    s.allocatePrize(address(token1), 1, 300);
+
+    assertEq(s.getClaimablePrize(1, owner2, address(token1)), 300 / 3);
+
+    vm.prank(owner2);
+    s.claimPrize(1, address(token1));
+
+    assertEq(s.claimedAmounts(owner2, address(token1)), 90 / 3 + 100);
+    assertEq(s.totalClaimedAmounts(address(token1)), 90 / 3 + 100);
+
+    assertEq(token1.balanceOf(owner2), 90 / 3 + 100);
+    assertEq(token1.balanceOf(address(s)), 120 - 90 / 3 + 200);
   }
 }

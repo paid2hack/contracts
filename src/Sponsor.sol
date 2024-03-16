@@ -24,8 +24,10 @@ contract Sponsor is Ownable {
   mapping (uint => Prize) internal prizesAllocated;
   // token => total prize allocated
   mapping (address => uint) public totalTokenPrizeAmounts;
-  // amounts withdrawn: team member => token => amount
-  mapping (address => mapping(address => uint)) public withdrawnAmounts;
+  // amounts claimed: team member => token => amount
+  mapping (address => mapping(address => uint)) public claimedAmounts;
+  // token => total claimed
+  mapping(address => uint) public totalClaimedAmounts;
 
   constructor(address _master, uint _eventId, string memory _name)
     Ownable(_msgSender())
@@ -48,7 +50,7 @@ contract Sponsor is Ownable {
       revert InvalidTeam(_teamId);
     }
 
-    if (totalTokenPrizeAmounts[_token] + _amount > t.balanceOf(address(this))) {
+    if (totalTokenPrizeAmounts[_token] - totalClaimedAmounts[_token] + _amount > t.balanceOf(address(this))) {
       revert NotEnoughFunds(_token);
     } else {
       totalTokenPrizeAmounts[_token] += _amount;
@@ -87,7 +89,7 @@ contract Sponsor is Ownable {
     }
     if (canClaim) {
       uint perPerson = prizesAllocated[_teamId].amounts[_token] / (1 + t.members.length);
-      amountLeft_ = perPerson - withdrawnAmounts[_claimant][_token];
+      amountLeft_ = perPerson - claimedAmounts[_claimant][_token];
     }
   }
 
@@ -97,7 +99,8 @@ contract Sponsor is Ownable {
     uint a = getClaimablePrize(_teamId, claimant, _token);
 
     if (a > 0) {
-      withdrawnAmounts[claimant][_token] += a;
+      claimedAmounts[claimant][_token] += a;
+      totalClaimedAmounts[_token] += a;
 
       IERC20 t = IERC20(_token);
       if (!t.transfer(claimant, a)) {

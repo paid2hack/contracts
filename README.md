@@ -6,6 +6,8 @@ Smart contracts for paid2hack.
 
 Install pre-requisites:
 
+* [Rust](https://www.rust-lang.org/tools/install)
+* [svm-rs](https://github.com/alloy-rs/svm-rs)
 * [Foundry](https://book.getfoundry.sh/)
 * [Bun](https://bun.sh/)
 

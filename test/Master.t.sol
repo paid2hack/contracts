@@ -6,8 +6,9 @@ import { Vm } from "forge-std/Vm.sol";
 
 import { Master, Team, Event } from "../src/Master.sol";
 import { Ownable } from "openzeppelin/access/Ownable.sol";
+import "../src/Errors.sol";
 
-contract NaymTokenTest is Test {
+contract MasterTest is Test {
   Master public m;
 
   address owner1 = address(0x111);

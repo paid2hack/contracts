@@ -2,35 +2,35 @@
 pragma solidity ^0.8.24;
 
 import { Ownable } from "openzeppelin/access/Ownable.sol";
-
-struct Team {
-  string name;
-  address leader;
-  address[] members;
-}
+import { IMaster, Team } from "./IMaster.sol";
+import "./Errors.sol";
 
 struct Event {
   string name;
   address owner;
   uint[] teamIds;
+  address[] sponsors;
 }
-
-error NotTeamLeader();
-error NotEventCreator();
 
 /**
  * @dev Master contract holding all events and teams.
  */
-contract Master is Ownable {
+contract Master is Ownable, IMaster {
   string public name;
 
   uint public totalEvents;
+  // event id => event
   mapping(uint => Event) public events;
+  // event id => sponsor => is a sponsor
+  mapping(uint => mapping(address => bool)) public isSponsor;
 
   uint public totalTeams;
+  // team id => team
   mapping(uint => Team) public teams;
 
-  constructor() Ownable(msg.sender) {}
+  constructor() Ownable(_msgSender()) {}
+
+  // Events
 
   function getEvent(uint _eventId) external view returns (Event memory) {
     return events[_eventId];
@@ -39,12 +39,14 @@ contract Master is Ownable {
   function createEvent(string memory _name) external {
     totalEvents++;
     events[totalEvents].name = _name;
-    events[totalEvents].owner = msg.sender;
+    events[totalEvents].owner = _msgSender();
   }
 
   function updateEventName(uint _eventId, string calldata _name) external isEventCreator(_eventId) {
     events[_eventId].name = _name;
   }
+
+  // Teams
 
   function getTeam(uint _teamId) external view returns (Team memory) {
     return teams[_teamId];
@@ -57,7 +59,7 @@ contract Master is Ownable {
     }
   }
 
-  function createTeam(uint _eventId, Team calldata _team) external {
+  function createTeam(uint _eventId, Team calldata _team) external isValidEvent(_eventId) {
     totalTeams++;
     teams[totalTeams] = _team;
     events[_eventId].teamIds.push(totalTeams);
@@ -71,17 +73,38 @@ contract Master is Ownable {
     teams[_teamId].name = _name;
   }
 
+  // Sponsors
+
+  function getEventSponsor (uint _eventId, uint _sponsorIndex) external view returns (address) {
+    return events[_eventId].sponsors[_sponsorIndex];
+  }
+
+  function addSponsor(uint _eventId, address _sponsor) external isValidEvent(_eventId) {
+    if (isSponsor[_eventId][_sponsor]) {
+      revert AlreadySponsoringEvent();
+    }
+    events[_eventId].sponsors.push(_sponsor);
+    isSponsor[_eventId][_sponsor] = true;
+  }
+
   // Modifiers
 
+  modifier isValidEvent(uint _eventId) {
+    if (_eventId > totalEvents) {
+      revert InvalidEvent(_eventId);
+    }
+    _;
+  }
+
   modifier isTeamLeader(uint _teamId) {
-    if (teams[_teamId].leader != msg.sender) {
+    if (teams[_teamId].leader != _msgSender()) {
       revert NotTeamLeader();
     }
     _;
   }
 
   modifier isEventCreator(uint _eventId) {
-    if (events[_eventId].owner != msg.sender) {
+    if (events[_eventId].owner != _msgSender()) {
       revert NotEventCreator();
     }
     _;

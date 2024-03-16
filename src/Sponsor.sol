@@ -87,6 +87,10 @@ contract Sponsor is Ownable, ISponsor {
     return teamPrizes[_teamId].amounts[_token];
   }
 
+  function getAllocatablePrize(address _token) external view returns (uint amount_) {
+    amount_ = IERC20(_token).balanceOf(address(this)) - totalTokenPrizeAmounts[_token] + totalClaimedAmounts[_token];
+  }
+
   function getClaimablePrize(uint _teamId, address _claimant, address _token) public view returns (uint amountLeft_) {
     Team memory t = master.getTeam(_teamId);
     bool canClaim = (t.leader == _claimant);

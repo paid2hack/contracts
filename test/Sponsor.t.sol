@@ -293,4 +293,21 @@ contract SponsorTest is Test {
     assertEq(token1.balanceOf(owner2), 90 / 3 + 100);
     assertEq(token1.balanceOf(address(s)), 120 - 90 / 3 + 200);
   }
+
+  function test_Sponsor_GetAllocatablePrize() public {
+    Sponsor s = test_Sponsor_AllocatePrizes();
+
+    assertEq(s.getAllocatablePrize(address(token1)), 0);
+    assertEq(s.getAllocatablePrize(address(token2)), 0);
+
+    token1.mint(address(s), 100);
+    token2.mint(address(s), 200);
+
+    assertEq(s.getAllocatablePrize(address(token1)), 100);
+    assertEq(s.getAllocatablePrize(address(token2)), 200);
+
+    s.claimPrize(1, address(token1), owner2);
+
+    assertEq(s.getAllocatablePrize(address(token1)), 100);
+  }
 }

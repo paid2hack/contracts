@@ -32,10 +32,14 @@ contract Master is Ownable {
 
   constructor() Ownable(msg.sender) {}
 
+  function getEvent(uint _eventId) external view returns (Event memory) {
+    return events[_eventId];
+  }
+
   function createEvent(string memory _name) external {
     totalEvents++;
-    events[totalEvents].owner = msg.sender;
     events[totalEvents].name = _name;
+    events[totalEvents].owner = msg.sender;
   }
 
   function updateEventName(uint _eventId, string calldata _name) external isEventCreator(_eventId) {

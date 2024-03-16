@@ -22,6 +22,12 @@ To compile the contracts:
 $ bun compile
 ```
 
+To run tests:
+
+```
+$ bun tests
+```
+
 ### Deploy to local testnet
 
 In a separate terminal, start a local devnet:

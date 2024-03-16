@@ -134,5 +134,7 @@ contract SponsorTest is Test {
 
   function test_Sponsor_GetClaimablePrize() public {
     test_Sponsor_AllocatePrizes();
+
+    assertEq(s.getClaimablePrize(1, owner1, token1), 0);
   }
 }

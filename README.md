@@ -30,6 +30,10 @@ To run tests:
 $ bun tests
 ```
 
+### exports.ts
+
+All commands will generate the `generated/exports.ts` file which contains ABI and bytecode to be used by the dapp.
+
 ### Deploy to local testnet
 
 In a separate terminal, start a local devnet:

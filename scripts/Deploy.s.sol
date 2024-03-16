@@ -51,7 +51,13 @@ contract DeployScript is Script {
     c.log("MockToken1 deployed to: %s", address(token1));
 
     c.log("Allocating prizes...");
-    s.allocatePrize(address(token1), 1, 3 ether);
+    address[] memory tokens = new address[](1);
+    tokens[0] = address(token1);
+    uint[] memory teamIds = new uint[](1);
+    teamIds[0] = 1;
+    uint[] memory amounts = new uint[](1);
+    amounts[0] = 3 ether;
+    s.allocatePrizes(tokens, teamIds, amounts);
     c.log("Prizes allocated");
 
     vm.stopBroadcast();        

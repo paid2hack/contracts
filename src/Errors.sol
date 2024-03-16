@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 error NotTeamLeader();
 error NotEventCreator();
+error InvalidInput();
 error InvalidEvent(uint _eventId);
 error InvalidTeam(uint _teamId);
 error AlreadySponsoringEvent();

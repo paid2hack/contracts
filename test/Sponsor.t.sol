@@ -91,28 +91,54 @@ contract SponsorTest is Test {
   function test_Sponsor_AllocatePrizes_NotOwner() public {
     Sponsor s = _createEventTeamSponsor();
 
+    address[] memory tokens = new address[](1);
+    tokens[0] = address(token1);
+
+    uint[] memory teamIds = new uint[](1);
+    teamIds[0] = 1;
+
+    uint[] memory amounts = new uint[](1);
+    amounts[0] = 100;
+
     vm.prank(owner2);
     vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, owner2));
-    s.allocatePrize(address(token1), 1, 100);
+    s.allocatePrizes(tokens, teamIds, amounts);
   }
 
   function test_Sponsor_AllocatePrizes_NotEnoughFunds() public {
     Sponsor s = _createEventTeamSponsor();
 
+    address[] memory tokens = new address[](1);
+    tokens[0] = address(token1);
+
+    uint[] memory teamIds = new uint[](1);
+    teamIds[0] = 1;
+
+    uint[] memory amounts = new uint[](1);
+    amounts[0] = 100;
+
     vm.prank(owner1);
     vm.expectRevert(abi.encodeWithSelector(NotEnoughFunds.selector, address(token1)));
-    s.allocatePrize(address(token1), 1, 100);
+    s.allocatePrizes(tokens, teamIds, amounts);
   }
 
   function test_Sponsor_AllocatePrizes_InvalidTeam() public {
     Sponsor s = _createEventTeamSponsor();
 
     token1.mint(address(s), 133);
-    token2.mint(address(s), 160);
+
+    address[] memory tokens = new address[](1);
+    tokens[0] = address(token1);
+
+    uint[] memory teamIds = new uint[](1);
+    teamIds[0] = 3;
+
+    uint[] memory amounts = new uint[](1);
+    amounts[0] = 100;
 
     vm.prank(owner1);
     vm.expectRevert(abi.encodeWithSelector(InvalidTeam.selector, 3));
-    s.allocatePrize(address(token1), 3, 100);
+    s.allocatePrizes(tokens, teamIds, amounts);
   }
 
   function test_Sponsor_AllocatePrizes() public returns (Sponsor) { 
@@ -122,10 +148,29 @@ contract SponsorTest is Test {
     token2.mint(address(s), 270);
 
     vm.startPrank(owner1);
-    s.allocatePrize(address(token1), 1, 90);
-    s.allocatePrize(address(token2), 1, 150);
-    s.allocatePrize(address(token1), 2, 30); 
-    s.allocatePrize(address(token2), 2, 120);
+
+    address[] memory tokens = new address[](2);
+    tokens[0] = address(token1);
+    tokens[1] = address(token2);
+
+    uint[] memory teamIds = new uint[](2);
+    teamIds[0] = 1;
+    teamIds[1] = 1;
+
+    uint[] memory amounts = new uint[](2);
+    amounts[0] = 90;
+    amounts[1] = 150;
+
+    s.allocatePrizes(tokens, teamIds, amounts);
+
+    teamIds[0] = 2;
+    teamIds[1] = 2;
+
+    amounts[0] = 30;
+    amounts[1] = 120;
+
+    s.allocatePrizes(tokens, teamIds, amounts);
+
     vm.stopPrank(); 
 
     assertEq(s.getPrizeTokens(1).length, 2);
@@ -224,7 +269,17 @@ contract SponsorTest is Test {
     token1.mint(address(s), 300);
 
     vm.prank(owner1);
-    s.allocatePrize(address(token1), 1, 300);
+
+    address[] memory tokens = new address[](1);
+    tokens[0] = address(token1);
+
+    uint[] memory teamIds = new uint[](1);
+    teamIds[0] = 1;
+
+    uint[] memory amounts = new uint[](1);
+    amounts[0] = 300;
+
+    s.allocatePrizes(tokens, teamIds, amounts);
 
     assertEq(s.getClaimablePrize(1, owner2, address(token1)), 300 / 3);
 

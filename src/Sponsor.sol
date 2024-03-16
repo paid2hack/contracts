@@ -42,7 +42,17 @@ contract Sponsor is Ownable {
     name = _name;
   }
 
-  function allocatePrize(address _token, uint _teamId, uint _amount) external onlyOwner {
+  function allocatePrizes(address[] calldata _tokens, uint[] calldata _teamIds, uint[] calldata _amounts) external onlyOwner {
+    if (_tokens.length != _teamIds.length || _tokens.length != _amounts.length) {
+      revert InvalidInput();
+    }
+
+    for (uint i = 0; i < _tokens.length; i++) {
+      _allocatePrize(_tokens[i], _teamIds[i], _amounts[i]);
+    }
+  }
+
+  function _allocatePrize(address _token, uint _teamId, uint _amount) private {
     IERC20 t = IERC20(_token);
 
     Team memory team = master.getTeam(_teamId);

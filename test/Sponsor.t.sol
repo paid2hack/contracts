@@ -62,6 +62,12 @@ contract SponsorTest is Test {
       members: members
     }));
 
+    m.createTeam(1, Team({
+      name: "Team 2",
+      leader: owner2,
+      members: members
+    }));
+
     Sponsor s = new Sponsor(address(m), 1, "Sponsor 1");
 
     vm.stopPrank();
@@ -105,36 +111,86 @@ contract SponsorTest is Test {
     token2.mint(address(s), 160);
 
     vm.prank(owner1);
-    vm.expectRevert(abi.encodeWithSelector(InvalidTeam.selector, 2));
-    s.allocatePrize(address(token1), 2, 100);
+    vm.expectRevert(abi.encodeWithSelector(InvalidTeam.selector, 3));
+    s.allocatePrize(address(token1), 3, 100);
   }
 
-  function test_Sponsor_AllocatePrizes() public {
+  function test_Sponsor_AllocatePrizes() public returns (Sponsor) { 
     Sponsor s = _createEventTeamSponsor();
 
-    token1.mint(address(s), 133);
-    token2.mint(address(s), 160);
+    token1.mint(address(s), 120);
+    token2.mint(address(s), 270);
 
     vm.startPrank(owner1);
-    s.allocatePrize(address(token1), 1, 100);
+    s.allocatePrize(address(token1), 1, 90);
     s.allocatePrize(address(token2), 1, 150);
-    s.allocatePrize(address(token1), 1, 33); // 133 total
-    s.allocatePrize(address(token2), 1, 10); // 160 total
+    s.allocatePrize(address(token1), 2, 30); 
+    s.allocatePrize(address(token2), 2, 120);
     vm.stopPrank(); 
 
     assertEq(s.getPrizeTokens(1).length, 2);
     assertEq(s.getPrizeTokens(1)[0], address(token1));
     assertEq(s.getPrizeTokens(1)[1], address(token2));
-    assertEq(s.getPrizeAmount(1, address(token1)), 133);
-    assertEq(s.getPrizeAmount(1, address(token2)), 160);
+    assertEq(s.getPrizeAmount(1, address(token1)), 90);
+    assertEq(s.getPrizeAmount(1, address(token2)), 150);
 
-    assertEq(s.totalTokenPrizeAmounts(address(token1)), 133);
-    assertEq(s.totalTokenPrizeAmounts(address(token2)), 160);
+    assertEq(s.getPrizeTokens(2).length, 2);
+    assertEq(s.getPrizeTokens(2)[0], address(token1));
+    assertEq(s.getPrizeTokens(2)[1], address(token2));
+    assertEq(s.getPrizeAmount(2, address(token1)), 30);
+    assertEq(s.getPrizeAmount(2, address(token2)), 120);
+
+    assertEq(s.totalTokenPrizeAmounts(address(token1)), 120);
+    assertEq(s.totalTokenPrizeAmounts(address(token2)), 270);
+
+    return s;
   }
 
   function test_Sponsor_GetClaimablePrize() public {
-    test_Sponsor_AllocatePrizes();
+    Sponsor s = test_Sponsor_AllocatePrizes();
 
-    assertEq(s.getClaimablePrize(1, owner1, token1), 0);
+    // team 1 prizes - split between 3 claimaints
+    assertEq(s.getClaimablePrize(1, owner1, address(token1)), 0);
+    assertEq(s.getClaimablePrize(1, owner2, address(token1)), 90 / 3);
+    assertEq(s.getClaimablePrize(1, owner3, address(token1)), 90 / 3);
+    assertEq(s.getClaimablePrize(1, owner4, address(token1)), 90 / 3);
+    assertEq(s.getClaimablePrize(1, owner1, address(token2)), 0);
+    assertEq(s.getClaimablePrize(1, owner2, address(token2)), 150 / 3);
+    assertEq(s.getClaimablePrize(1, owner3, address(token2)), 150 / 3);
+    assertEq(s.getClaimablePrize(1, owner4, address(token2)), 150 / 3);
+
+    // team 2 prizes - split between 3 claimaints
+    assertEq(s.getClaimablePrize(2, owner1, address(token1)), 0);
+    assertEq(s.getClaimablePrize(2, owner2, address(token1)), 30 / 3);
+    assertEq(s.getClaimablePrize(2, owner3, address(token1)), 30 / 3);
+    assertEq(s.getClaimablePrize(2, owner4, address(token1)), 30 / 3);
+    assertEq(s.getClaimablePrize(2, owner1, address(token2)), 0);
+    assertEq(s.getClaimablePrize(2, owner2, address(token2)), 120 / 3);
+    assertEq(s.getClaimablePrize(2, owner3, address(token2)), 120 / 3);
+    assertEq(s.getClaimablePrize(2, owner4, address(token2)), 120 / 3);
+  }
+
+  function test_Sponsor_ClaimPrize() public {
+    Sponsor s = test_Sponsor_AllocatePrizes();
+
+    vm.startPrank(owner2);
+    s.claimPrize(1, address(token1));
+    s.claimPrize(1, address(token2));
+    vm.stopPrank();
+
+    assertEq(s.getClaimablePrize(1, owner1, address(token1)), 0);
+    assertEq(s.getClaimablePrize(1, owner2, address(token1)), 0);
+    assertEq(s.getClaimablePrize(1, owner3, address(token1)), 90 / 3);
+    assertEq(s.getClaimablePrize(1, owner4, address(token1)), 90 / 3);
+    assertEq(s.getClaimablePrize(1, owner1, address(token2)), 0);
+    assertEq(s.getClaimablePrize(1, owner2, address(token2)), 0);
+    assertEq(s.getClaimablePrize(1, owner3, address(token2)), 150 / 3);
+    assertEq(s.getClaimablePrize(1, owner4, address(token2)), 150 / 3);
+
+    assertEq(token1.balanceOf(owner2), 90 / 3);
+    assertEq(token2.balanceOf(owner2), 150 / 3);
+
+    assertEq(token1.balanceOf(address(s)), 120 - 90 / 3);
+    assertEq(token2.balanceOf(address(s)), 270 - 150 / 3);
   }
 }

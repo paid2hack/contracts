@@ -50,8 +50,9 @@ contract Master is Ownable {
     return teams[_teamId];
   }
 
-  function getEventTeam (uint _eventId, uint _teamIndex) external view returns (Team memory) {
-    return teams[events[_eventId].teamIds[_teamIndex]];
+  function getEventTeam (uint _eventId, uint _teamIndex) external view returns (uint teamId_, Team memory team_) {
+    teamId_ = events[_eventId].teamIds[_teamIndex];
+    team_ = teams[teamId_];
   }
 
   function createTeam(uint _eventId, Team calldata _team) external {

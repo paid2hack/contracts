@@ -104,17 +104,15 @@ contract Sponsor is Ownable, ISponsor {
     }
   }
 
-  function claimPrize(uint _teamId, address _token) external {
-    address claimant = _msgSender();
-
-    uint a = getClaimablePrize(_teamId, claimant, _token);
+  function claimPrize(uint _teamId, address _token, address _claimant) external {
+    uint a = getClaimablePrize(_teamId, _claimant, _token);
 
     if (a > 0) {
-      claimedAmounts[claimant][_token] += a;
+      claimedAmounts[_claimant][_token] += a;
       totalClaimedAmounts[_token] += a;
 
       IERC20 t = IERC20(_token);
-      if (!t.transfer(claimant, a)) {
+      if (!t.transfer(_claimant, a)) {
         revert WithdrawalFailed(_token);
       }
     }

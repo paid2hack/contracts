@@ -224,8 +224,7 @@ contract SponsorTest is Test {
   function test_Sponsor_ClaimPrize_NoneOwed() public {
     Sponsor s = test_Sponsor_AllocatePrizes();
 
-    vm.prank(owner1);
-    s.claimPrize(1, address(token1));
+    s.claimPrize(1, address(token1), owner1);
 
     assertEq(token1.balanceOf(owner1), 0);    
     assertEq(token1.balanceOf(address(s)), 120);
@@ -234,10 +233,8 @@ contract SponsorTest is Test {
   function test_Sponsor_ClaimPrize() public {
     Sponsor s = test_Sponsor_AllocatePrizes();
 
-    vm.startPrank(owner2);
-    s.claimPrize(1, address(token1));
-    s.claimPrize(1, address(token2));
-    vm.stopPrank();
+    s.claimPrize(1, address(token1), owner2);
+    s.claimPrize(1, address(token2), owner2);
 
     assertEq(s.claimedAmounts(owner2, address(token1)), 90 / 3);
     assertEq(s.claimedAmounts(owner2, address(token2)), 150 / 3);
@@ -263,8 +260,7 @@ contract SponsorTest is Test {
   function test_Sponsor_ClaimPrize_AfterNewPrizeAllocated() public {
     Sponsor s = test_Sponsor_AllocatePrizes();
 
-    vm.prank(owner2);
-    s.claimPrize(1, address(token1));
+    s.claimPrize(1, address(token1), owner2);
 
     assertEq(s.claimedAmounts(owner2, address(token1)), 90 / 3);
     assertEq(s.totalClaimedAmounts(address(token1)), 90 / 3);
@@ -289,8 +285,7 @@ contract SponsorTest is Test {
 
     assertEq(s.getClaimablePrize(1, owner2, address(token1)), 300 / 3);
 
-    vm.prank(owner2);
-    s.claimPrize(1, address(token1));
+    s.claimPrize(1, address(token1), owner2);
 
     assertEq(s.claimedAmounts(owner2, address(token1)), 90 / 3 + 100);
     assertEq(s.totalClaimedAmounts(address(token1)), 90 / 3 + 100);

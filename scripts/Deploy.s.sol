@@ -2,7 +2,10 @@
 pragma solidity ^0.8.24;
 
 import { Script, console2 as c } from "forge-std/Script.sol";
+import { ERC20Mock } from "openzeppelin-contracts/contracts/mocks/token/ERC20Mock.sol";
 import { Master } from "src/Master.sol";
+import { Sponsor } from "src/Sponsor.sol";
+import { Team } from "src/IMaster.sol";
 
 contract DeployScript is Script {
   bytes32 internal constant CREATE2_SALT = keccak256("Paid2Hack.deployment.salt");
@@ -28,8 +31,28 @@ contract DeployScript is Script {
 
     _assertDeployedAddressIsEmpty(type(Master).creationCode, abi.encode());
 
-    Master master = new Master{salt: CREATE2_SALT}();
-    c.log("Master deployed to: %s", address(master));
+    c.log("Deploying Master...");
+    Master m = new Master{salt: CREATE2_SALT}();
+    c.log("Master deployed to: %s", address(m));
+
+    c.log("Creating dummy event, team and sponsor...");
+    m.createEvent("Event 1");
+    m.createTeam(1, Team({
+      name: "Team 1",
+      leader: wallet,
+      members: new address[](0)
+    }));
+    Sponsor s = new Sponsor(address(m), 1, "Sponsor 1");
+    c.log("Dummy event, team and sponsor created");
+
+    c.log("Deploying MockToken1...");
+    ERC20Mock token1 = new ERC20Mock{salt: CREATE2_SALT}();
+    token1.mint(address(s), 1000 ether);
+    c.log("MockToken1 deployed to: %s", address(token1));
+
+    c.log("Allocating prizes...");
+    s.allocatePrize(address(token1), 1, 3 ether);
+    c.log("Prizes allocated");
 
     vm.stopBroadcast();        
   }

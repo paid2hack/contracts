@@ -21,7 +21,7 @@ contract Sponsor is Ownable {
   uint public eventId;
 
   // team id => prize information
-  mapping (uint => Prize) internal prizesAllocated;
+  mapping (uint => Prize) internal teamPrizes;
   // token => total prize allocated
   mapping (address => uint) public totalTokenPrizeAmounts;
   // amounts claimed: team member => token => amount
@@ -54,26 +54,26 @@ contract Sponsor is Ownable {
       revert NotEnoughFunds(_token);
     } else {
       totalTokenPrizeAmounts[_token] += _amount;
-      prizesAllocated[_teamId].amounts[_token] += _amount;
+      teamPrizes[_teamId].amounts[_token] += _amount;
       bool inTokenList = false;
-      for (uint i = 0; i < prizesAllocated[_teamId].tokens.length; i++) {
-        if (prizesAllocated[_teamId].tokens[i] == _token) {
+      for (uint i = 0; i < teamPrizes[_teamId].tokens.length; i++) {
+        if (teamPrizes[_teamId].tokens[i] == _token) {
           inTokenList = true;
           break;
         }
       }
       if (!inTokenList) {
-        prizesAllocated[_teamId].tokens.push(_token);
+        teamPrizes[_teamId].tokens.push(_token);
       }      
     }
   }
 
   function getPrizeTokens(uint _teamId) external view returns (address[] memory) {
-    return prizesAllocated[_teamId].tokens;
+    return teamPrizes[_teamId].tokens;
   }
 
   function getPrizeAmount(uint _teamId, address _token) external view returns (uint) {
-    return prizesAllocated[_teamId].amounts[_token];
+    return teamPrizes[_teamId].amounts[_token];
   }
 
   function getClaimablePrize(uint _teamId, address _claimant, address _token) public view returns (uint amountLeft_) {
@@ -88,7 +88,7 @@ contract Sponsor is Ownable {
       }
     }
     if (canClaim) {
-      uint perPerson = prizesAllocated[_teamId].amounts[_token] / (1 + t.members.length);
+      uint perPerson = teamPrizes[_teamId].amounts[_token] / (1 + t.members.length);
       amountLeft_ = perPerson - claimedAmounts[_claimant][_token];
     }
   }

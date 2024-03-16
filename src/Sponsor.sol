@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import { Ownable } from "openzeppelin/access/Ownable.sol";
 import { IERC20 } from "openzeppelin/token/ERC20/IERC20.sol";
 import { IMaster, Team } from "./IMaster.sol";
+import { ISponsor } from "./ISponsor.sol";
 import "./Errors.sol";
 
 struct Prize {
@@ -15,7 +16,7 @@ struct Prize {
 /**
   TODO: Add timeout on prize allocations - if prize not claimed then sponsor can take the money back.
  */
-contract Sponsor is Ownable {
+contract Sponsor is Ownable, ISponsor {
   IMaster public master;
   string public name;
   uint public eventId;

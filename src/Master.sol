@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import { Ownable } from "openzeppelin/access/Ownable.sol";
 import { IMaster, Team } from "./IMaster.sol";
+import { ISponsor } from "./ISponsor.sol";
 import "./Errors.sol";
 
 struct Event {
@@ -85,6 +86,14 @@ contract Master is Ownable, IMaster {
     }
     events[_eventId].sponsors.push(_sponsor);
     isSponsor[_eventId][_sponsor] = true;
+  }
+
+  // Prize calculations
+
+  function getTotalSponsorPrize(uint _eventId, address _token) external view returns (uint totalPrize_) {
+    for (uint i = 0; i < events[_eventId].sponsors.length; i++) {
+      totalPrize_ += ISponsor(events[_eventId].sponsors[i]).totalTokenPrizeAmounts(_token);
+    }
   }
 
   // Modifiers

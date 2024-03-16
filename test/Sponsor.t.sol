@@ -191,6 +191,12 @@ contract SponsorTest is Test {
     return s;
   }
 
+  function test_Sponsor_GetTotalPrizeViaMaster() public {
+    test_Sponsor_AllocatePrizes();
+    assertEq(m.getTotalSponsorPrize(1, address(token1)), 120);
+    assertEq(m.getTotalSponsorPrize(1, address(token2)), 270);
+  }
+
   function test_Sponsor_GetClaimablePrize() public {
     Sponsor s = test_Sponsor_AllocatePrizes();
 

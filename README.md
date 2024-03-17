@@ -50,6 +50,17 @@ $ bun deploy-local
 
 _Note: Deployment is done using [CREATE2](). So, if you need to deploy the contracts again, first stop and restart the devnet in the other terminal._
 
+## Deploying to public chains
+
+**NOTE: Use a burner wallet to deploy, don't use your own main wallet!!**
+
+```shell
+$ export PRIVATE_KEY="0x..."
+$ export RPC_URL="http://..."
+$ export CHAIN_ID="..."
+$ bun deploy-public
+```
+
 ## License
 
 AGPLv3 - see [LICENSE.md](LICENSE.md)

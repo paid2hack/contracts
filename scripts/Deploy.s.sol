@@ -47,7 +47,7 @@ contract DeployScript is Script {
 
     c.log("Deploying MockToken1...");
     ERC20Mock token1 = new ERC20Mock{salt: CREATE2_SALT}();
-    token1.mint(address(s), 1000 ether);
+    token1.mint(address(s), 1000000 ether);
     c.log("MockToken1 deployed to: %s", address(token1));
 
     c.log("Allocating prizes...");

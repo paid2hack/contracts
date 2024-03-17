@@ -63,7 +63,12 @@ contract Sponsor is Ownable, ISponsor {
       revert InvalidTeam(_teamId);
     }
 
-    if (totalTokenPrizeAmounts[_token] - totalClaimedAmounts[_token] + _amount > t.balanceOf(address(this))) {
+    uint fundsAvailable = 0;
+    uint f = totalTokenPrizeAmounts[_token] + _amount;
+    if (f >= totalClaimedAmounts[_token]) {
+      fundsAvailable = f - totalClaimedAmounts[_token];
+    }
+    if (fundsAvailable > t.balanceOf(address(this))) {
       revert NotEnoughFunds(_token);
     } else {
       totalTokenPrizeAmounts[_token] += _amount;
@@ -94,7 +99,10 @@ contract Sponsor is Ownable, ISponsor {
   }
 
   function getAllocatablePrize(address _token) external view returns (uint amount_) {
-    amount_ = IERC20(_token).balanceOf(address(this)) - totalTokenPrizeAmounts[_token] + totalClaimedAmounts[_token];
+    uint bal = IERC20(_token).balanceOf(address(this)) + totalClaimedAmounts[_token]; 
+    if (bal >= totalTokenPrizeAmounts[_token]) {
+      amount_ = bal - totalTokenPrizeAmounts[_token];
+    }
   }
 
   function getClaimablePrize(uint _teamId, address _claimant, address _token) public view returns (uint amountLeft_) {
@@ -110,7 +118,9 @@ contract Sponsor is Ownable, ISponsor {
     }
     if (canClaim) {
       uint perPerson = teamPrizes[_teamId].amounts[_token] / (1 + t.members.length);
-      amountLeft_ = perPerson - claimedAmounts[_claimant][_token];
+      if (perPerson >= claimedAmounts[_claimant][_token]) {
+        amountLeft_ = perPerson - claimedAmounts[_claimant][_token];
+      }
     }
   }
 

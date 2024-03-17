@@ -2,6 +2,14 @@
 
 Smart contracts for paid2hack.
 
+## Live deployments
+
+* Arbitrum Sepolia:
+  * Master contract: https://sepolia.arbiscan.io/address/0xFb1D7fb6e0C40A74364F2ba36dEE8937A076ceBf
+  * Mock ERC20: https://sepolia.arbiscan.io/address/0xe6883756aa2caD2a358C587a1D6D2834b19EC6e5
+
+_TODO: contract verification on arbiscan_
+
 ## Developer guide
 
 Install pre-requisites:

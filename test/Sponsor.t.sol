@@ -255,6 +255,9 @@ contract SponsorTest is Test {
 
     assertEq(token1.balanceOf(address(s)), 120 - 90 / 3);
     assertEq(token2.balanceOf(address(s)), 270 - 150 / 3);
+
+    assertEq(s.getClaimedAmount(1, address(token1)), 90 / 3);
+    assertEq(s.getClaimedAmount(1, address(token2)), 150 / 3);
   }
 
   function test_Sponsor_ClaimPrize_AfterNewPrizeAllocated() public {
@@ -289,6 +292,8 @@ contract SponsorTest is Test {
 
     assertEq(s.claimedAmounts(owner2, address(token1)), 90 / 3 + 100);
     assertEq(s.totalClaimedAmounts(address(token1)), 90 / 3 + 100);
+
+    assertEq(s.getClaimedAmount(1, address(token1)), 90 / 3 + 100);
 
     assertEq(token1.balanceOf(owner2), 90 / 3 + 100);
     assertEq(token1.balanceOf(address(s)), 120 - 90 / 3 + 200);

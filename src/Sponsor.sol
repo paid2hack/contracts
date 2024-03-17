@@ -11,6 +11,8 @@ struct Prize {
   address[] tokens;
   // token => amount
   mapping(address => uint) amounts;
+  // token => claimed amount
+  mapping(address => uint) claimed;
 }
 
 /**
@@ -87,6 +89,10 @@ contract Sponsor is Ownable, ISponsor {
     return teamPrizes[_teamId].amounts[_token];
   }
 
+  function getClaimedAmount(uint _teamId, address _token) external view returns (uint) {
+    return teamPrizes[_teamId].claimed[_token];
+  }
+
   function getAllocatablePrize(address _token) external view returns (uint amount_) {
     amount_ = IERC20(_token).balanceOf(address(this)) - totalTokenPrizeAmounts[_token] + totalClaimedAmounts[_token];
   }
@@ -113,6 +119,7 @@ contract Sponsor is Ownable, ISponsor {
 
     if (a > 0) {
       claimedAmounts[_claimant][_token] += a;
+      teamPrizes[_teamId].claimed[_token] += a;
       totalClaimedAmounts[_token] += a;
 
       IERC20 t = IERC20(_token);

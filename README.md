@@ -1,6 +1,6 @@
 # Paid2Hack contracts
 
-Smart contracts for paid2hack.
+Smart contracts for https://paid2hack.com
 
 ## Live deployments
 
